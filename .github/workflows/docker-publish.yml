@@ -21,18 +21,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3️⃣ Convert repo owner to lowercase for GHCR
+      # 3️⃣ Convert repo owner to lowercase
       - name: Convert repo owner to lowercase
         id: repo_owner
         run: echo "lower=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      # 4️⃣ Login to GHCR using PAT (not GITHUB_TOKEN)
+      # 4️⃣ Login to GHCR using your PAT
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
+          username: ashok1013
+          password: ${{ secrets.GH_PATH }}
 
       # 5️⃣ Build and push Docker image
       - name: Build and push Docker image
