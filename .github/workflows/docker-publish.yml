@@ -1,32 +1,41 @@
-name: Publish Docker image
+name: Publish Docker Image
 
 on:
   push:
     branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout source
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Buildx for proper caching
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # 3️⃣ Convert repo owner to lowercase for GHCR
       - name: Convert repo owner to lowercase
         id: repo_owner
         run: echo "lower=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
+      # 4️⃣ Login to GHCR using PAT (not GITHUB_TOKEN)
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
-      - name: Build and push image
+      # 5️⃣ Build and push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
