@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
 
 permissions:
   contents: write
   packages: write
 
 jobs:
+
+  # -------------------------
+  # 1. TEST JOB
+  # -------------------------
   test:
     runs-on: ubuntu-latest
     steps:
@@ -23,18 +29,28 @@ jobs:
         run: pytest -q
 
 
+  # -------------------------
+  # 2. LINUX NATIVE BUILD
+  # -------------------------
   build-linux-native:
     runs-on: ubuntu-latest
     needs: test
     steps:
       - uses: actions/checkout@v4
 
-      # Lowercase repo owner for GHCR
+      # Required for GHCR image pulling
       - name: Convert repo owner to lowercase
         id: repo_owner
         run: echo "lower=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      - name: Build native libs using Docker image
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ashok1013
+          password: ${{ secrets.GH_PAT }}
+
+      - name: Build native libs inside Docker
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/workspace" \
@@ -47,6 +63,9 @@ jobs:
           path: build_artifacts/
 
 
+  # -------------------------
+  # 3. LINUX WHEEL BUILD
+  # -------------------------
   build-linux-wheel:
     runs-on: ubuntu-latest
     needs: build-linux-native
@@ -75,13 +94,16 @@ jobs:
           path: wheelhouse/*.whl
 
 
+  # -------------------------
+  # 4. WINDOWS NATIVE BUILD
+  # -------------------------
   build-windows-native:
     runs-on: windows-latest
     needs: test
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build native Windows libs
+      - name: Build Windows native libs
         shell: powershell
         run: |
           git submodule update --init --recursive
@@ -97,6 +119,9 @@ jobs:
           path: build/
 
 
+  # -------------------------
+  # 5. WINDOWS WHEEL BUILD
+  # -------------------------
   build-windows-wheel:
     runs-on: windows-latest
     needs: build-windows-native
@@ -123,6 +148,9 @@ jobs:
           path: wheelhouse/*.whl
 
 
+  # -------------------------
+  # 6. RELEASE JOB
+  # -------------------------
   release:
     runs-on: ubuntu-latest
     needs: [build-linux-wheel, build-windows-wheel]
