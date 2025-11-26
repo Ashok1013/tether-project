@@ -1,3 +1,5 @@
+# docker/Dockerfile — defensive, robust copy + install of build_native.sh
+
 FROM ubuntu:22.04
 
 ARG USER=dev
@@ -6,23 +8,32 @@ ARG GID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+# Install build tools as root
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git python3 python3-pip python3-dev \
     cmake ninja-build build-essential \
     curl wget unzip zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user (but keep running as root for COPY/install)
 RUN groupadd -g ${GID} ${USER} || true \
  && useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USER}
 
+# Workdir and python packaging tools (still as root)
 WORKDIR /workspace
-USER ${USER}
-
-# Install Python packaging tools
 RUN python3 -m pip install --upgrade pip setuptools wheel
 
-# Copy our helper script
-COPY docker/build_native.sh /usr/local/bin/build_native.sh
-RUN chmod +x /usr/local/bin/build_native.sh
+# Defensive copy: stage to /tmp then install with correct mode
+# This avoids buildx COPY metadata/permission issues
+COPY docker/build_native.sh /tmp/build_native.sh
+RUN install -m 755 /tmp/build_native.sh /usr/local/bin/build_native.sh && rm /tmp/build_native.sh
 
+# Ensure ownership of workspace to non-root user
+RUN chown -R ${UID}:${GID} /workspace /usr/local/bin/build_native.sh
+
+# Switch to non-root user for running build
+USER ${USER}
+ENV HOME=/home/${USER}
+
+# Entrypoint runs the native build script (script should place artifacts under /workspace/build_artifacts/)
 ENTRYPOINT ["/usr/local/bin/build_native.sh"]
