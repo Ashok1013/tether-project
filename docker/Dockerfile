@@ -41,3 +41,4 @@ ENV HOME=/root
 ENTRYPOINT ["/usr/local/bin/build_native.sh"]
 # rebuild
 # rebuild
+# rebuild
