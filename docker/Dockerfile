@@ -39,3 +39,4 @@ RUN install -m 755 /tmp/build_native.sh /usr/local/bin/build_native.sh && rm /tm
 ENV HOME=/root
 
 ENTRYPOINT ["/usr/local/bin/build_native.sh"]
+# rebuild
