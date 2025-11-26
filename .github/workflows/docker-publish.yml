@@ -47,4 +47,3 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo_owner.outputs.lower }}/mlc-llm-dev:latest
             ghcr.io/${{ steps.repo_owner.outputs.lower }}/mlc-llm-dev:${{ github.sha }}
- 
