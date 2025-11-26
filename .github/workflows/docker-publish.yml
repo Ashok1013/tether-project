@@ -13,28 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1. Checkout repository
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Buildx for proper caching
+      # 2. Setup Buildx for multi-platform + caching
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3️⃣ Convert repo owner to lowercase
+      # 3. Convert repo owner to lowercase (GHCR requirement)
       - name: Convert repo owner to lowercase
         id: repo_owner
         run: echo "lower=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      # 4️⃣ Login to GHCR using your PAT
+      # 4. Log in to GHCR using your PAT stored as GH_PAT
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ashok1013
-          password: ${{ secrets.GH_PATH }}
+          username: ashok1013      # your GitHub username
+          password: ${{ secrets.GH_PAT }}
 
-      # 5️⃣ Build and push Docker image
+      # 5. Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
