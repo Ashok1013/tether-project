@@ -34,3 +34,5 @@ ENV HOME=/root
 
 # Entrypoint runs the native build script
 ENTRYPOINT ["/usr/local/bin/build_native.sh"]
+
+echo "# rebuild" >> docker/Dockerfile
