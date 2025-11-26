@@ -22,10 +22,11 @@ git submodule update --init --recursive || true
 echo ">>> Running gen_cmake_config.py (non-interactive)..."
 export TVM_SOURCE_DIR=/workspace/3rdparty/tvm
 
-# Feed TWO answers:
-# 1) empty → default TVM source dir
-# 2) n → no CUDA
-printf "\nn\n" | python3 cmake/gen_cmake_config.py
+# THREE QUESTIONS:
+# 1) TVM path → empty (use default)
+# 2) Use CUDA? (y/n) → n
+# 3) Use ROCm? (y/n) → n
+printf "\nnn\n" | python3 cmake/gen_cmake_config.py
 
 echo ">>> Configuring CMake..."
 mkdir -p "${BUILD_DIR}"
