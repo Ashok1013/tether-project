@@ -23,11 +23,12 @@ echo ">>> Running gen_cmake_config.py (non-interactive)..."
 
 export TVM_SOURCE_DIR=/workspace/3rdparty/tvm
 
-# FEED 3 SEPARATE ANSWERS:
-# 1) <ENTER>
-# 2) n  (no CUDA)
-# 3) n  (no ROCm)
-printf "\n""n\n""n\n" | python3 cmake/gen_cmake_config.py
+# FEED 4 SEPARATE INPUTS:
+# 1) <ENTER> → default TVM
+# 2) n       → no CUDA
+# 3) n       → no ROCm
+# 4) n       → no Vulkan
+printf "\n""n\n""n\n""n\n" | python3 cmake/gen_cmake_config.py
 
 echo ">>> Configuring CMake..."
 mkdir -p "${BUILD_DIR}"
